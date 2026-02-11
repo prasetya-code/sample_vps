@@ -1,0 +1,63 @@
+version: "3.9"
+
+services:
+
+  traefik:
+    image: traefik:v2.10
+    container_name: traefik
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.myresolver.acme.tlschallenge=true"
+      - "--certificatesresolvers.myresolver.acme.email=EMAILKAMU"
+      - "--certificatesresolvers.myresolver.acme.storage=/letsencrypt/acme.json"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "./traefik/letsencrypt:/letsencrypt"
+    networks:
+      - web
+
+  flask:
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    container_name: flask_app
+    restart: always
+    expose:
+      - "5000"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.flask.rule=Host(`prasetyacode.com`)"
+      - "traefik.http.routers.flask.entrypoints=websecure"
+      - "traefik.http.routers.flask.tls.certresolver=myresolver"
+    depends_on:
+      - redis
+    networks:
+      - web
+      - internal
+
+  redis:
+    image: redis:7
+    container_name: redis
+    restart: always
+    networks:
+      - internal
+
+  squid:
+    image: ubuntu/squid
+    container_name: squid
+    volumes:
+      - ./squid/squid.conf:/etc/squid/squid.conf
+    ports:
+      - "3128:3128"
+    networks:
+      - internal
+
+networks:
+  web:
+  internal:

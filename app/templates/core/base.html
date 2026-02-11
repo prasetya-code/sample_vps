@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
+
+  <!-- Favicon -->
+  {% include 'core/favicon.html' %}
+
+  <title>{% block title %}Sample{% endblock %}</title>
+</head>
+
+<body
+  class="min-h-[100dvh]"
+  x-data="{ theme: document.documentElement.dataset.theme }"
+  x-cloak
+  x-init="
+    $nextTick(() => {
+      document.body.removeAttribute('x-cloak')
+
+      // 🔥 render Lucide SETELAH DOM & Alpine siap
+      if (window.lucide_icons) {
+        window.lucide_icons()
+      }
+    })
+  "
+
+  x-effect="
+    // Persist & apply theme
+    localStorage.theme = theme;
+    document.documentElement.dataset.theme = theme;
+
+    // 🔍 Debug log (jalan SETIAP theme berubah)
+    console.log('Theme now:', theme);
+  "
+>
+
+  {% block content %}{% endblock %}
+
+  <!-- JS -->
+  <script type="module" src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+  <!-- CDN -->
+  {% include 'core/cdn.html' %}
+
+</body>
+</html>
