@@ -8,7 +8,15 @@ main_bp = Blueprint('main', __name__)
 
 @main_bp.route("/")
 def index():
-    return render_template("pages/index.html")
+    return render_template("pages/index.html"), 200
+
+
+# =========================
+# CHECK CONDITIONS
+# =========================
+@main_bp.route("/health")
+def health():
+    return {"status": "ok"}, 200
 
 
 # =========================

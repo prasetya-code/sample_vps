@@ -1,10 +1,32 @@
 FROM python:3.11-slim
 
+# Prevent python from writing pyc files & buffering stdout
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+# Install system dependencies (jika dibutuhkan library seperti psycopg2, pillow, dll)
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
+# Install python dependencies
+COPY requirements.txt .
+RUN pip install --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
+
+# Copy project
 COPY . .
 
-CMD ["gunicorn", "-b", "0.0.0.0:5000", "wsgi:app"]
+# Expose internal port
+EXPOSE 5000
+
+# Gunicorn production config
+CMD ["gunicorn", \
+     "--workers=3", \
+     "--threads=2", \
+     "--timeout=60", \
+     "--bind=0.0.0.0:5000", \
+     "wsgi:app"]
