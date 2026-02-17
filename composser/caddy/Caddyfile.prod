@@ -1,0 +1,68 @@
+# =========================================
+# Caddyfile.prod
+# Production environment
+# =========================================
+
+{
+    email prasetya.career@gmail.com
+
+    log {
+        output file /data/caddy-global.log
+        level INFO
+    }
+}
+
+# -------------------------------------------------
+# HTTP → HTTPS redirect
+# -------------------------------------------------
+:80 {
+    redir https://{host}{uri}
+}
+
+# -------------------------------------------------
+# MAIN SITE (domain production)
+# -------------------------------------------------
+yourdomain.com {
+
+    # compression
+    encode gzip
+
+    # cache static asset
+    @static {
+        path *.css *.js *.png *.jpg *.jpeg *.gif *.svg *.woff *.woff2
+    }
+    header @static Cache-Control "public, max-age=31536000, immutable"
+
+    # security headers
+    header {
+        Strict-Transport-Security "max-age=31536000;"
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        -Server
+    }
+
+    # reverse proxy ke flask production
+    reverse_proxy flask_app:5000 {
+
+        # health check ringan
+        health_uri /health
+        health_interval 30s
+
+        # timeout
+        transport http {
+            read_timeout 30s
+            write_timeout 30s
+            dial_timeout 5s
+        }
+    }
+
+    # access log
+    log {
+        output file /data/access.log {
+            roll_size 50MB
+            roll_keep 5
+        }
+        format json
+    }
+}

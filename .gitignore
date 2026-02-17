@@ -1,5 +1,8 @@
 # Env
 win_env
+linux_env
+
+# Module
 node_modules
 
 # Cache

@@ -1,0 +1,28 @@
+FROM python:3.11-slim
+
+# Prevent python from writing pyc files & buffering stdout
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV FLASK_ENV=development
+
+WORKDIR /app
+
+# Install system dependencies (opsional, tetap bisa dipakai kalau perlu)
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install python dependencies
+COPY requirements.txt .
+RUN pip install --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
+
+# Copy project (di dev biasanya akan dioverride volume)
+COPY . .
+
+# Expose port dev
+EXPOSE 5000
+
+# Dev server (auto reload)
+CMD ["python", "run.py"]
