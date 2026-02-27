@@ -1,0 +1,16 @@
+# =========================================
+# Caddyfile.dev
+# Development environment
+# =========================================
+
+:80 {
+
+    # forward semua request ke flask dev container
+    reverse_proxy flask_app:5000
+
+    # optional: log ke console (biar gampang debug)
+    log {
+        output stdout
+        level DEBUG
+    }
+}

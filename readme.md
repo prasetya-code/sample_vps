@@ -17,3 +17,13 @@
 | High performance tuning   | Nginx           |
 | Enterprise load balancing | HAProxy / Envoy |
 | Network caching/filtering | Squid           |
+
+
+# 🔥 Kapan Perlu SSL di Dev?
+
+Wajib SSL kalau:
+1. Testing OAuth (Google login, dll)
+2. Testing payment gateway
+3. Testing cookie secure
+4. Testing PWA / service worker
+5. API butuh HTTPS

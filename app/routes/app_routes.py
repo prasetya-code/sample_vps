@@ -8,7 +8,7 @@ main_bp = Blueprint('main', __name__)
 
 @main_bp.route("/")
 def index():
-    return render_template("pages/index.html"), 200
+    return render_template("app/index.html"), 200
 
 
 # =========================

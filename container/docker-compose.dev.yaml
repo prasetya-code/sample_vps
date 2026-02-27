@@ -1,0 +1,58 @@
+services:
+  flask_app:
+
+    # Build image dari Dockerfile
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+
+    # Custom image name
+    image: flask_dev
+
+    # Custom container name
+    container_name: sample_vps_flask_dev
+
+    expose:
+      - "5000"
+
+    volumes:
+      # Bind Mount
+      - .:/app
+
+    environment:
+      - FLASK_ENV=development
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+
+    restart: unless-stopped
+
+
+  caddy:
+
+    # Pull dari official image
+    image: caddy:2
+    
+    # Custom container name
+    container_name: sample_vps_caddy_dev
+
+    ports:
+      - "80:80"
+      - "443:443"
+
+    depends_on:
+      - flask_app
+
+    volumes:
+      # Bind Mount
+      - ./composser/caddy/Caddyfile.dev:/etc/caddy/Caddyfile
+
+      # Named Volume
+      - caddy_data:/data
+      - caddy_config:/config
+
+    restart: unless-stopped
+
+
+volumes:
+  caddy_data:
+  caddy_config:
