@@ -3,14 +3,15 @@
 # Development environment
 # =========================================
 
+# untuk http
 :80 {
 
     # forward semua request ke flask dev container
     reverse_proxy flask_app:5000
 
-    # optional: log ke console (biar gampang debug)
+    # menambahkan log agar bisa di trace
     log {
-        output stdout
+        output file /var/log/caddy/caddy_dev_access.log
         level DEBUG
     }
 }
