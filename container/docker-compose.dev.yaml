@@ -3,26 +3,27 @@ services:
 
     # Build image dari Dockerfile
     build:
-      context: .
-      dockerfile: Dockerfile.dev
+      context: ..    # Selalu arahkan ke root project, jika sudah di root cukup (.)
+      dockerfile: container/Dockerfile.dev
 
-    # Custom image name
-    image: flask_dev
+    # Custom image name (ambil terlebih dahulu di docker hub, jika tidak ada maka lanjut ke proses build)
+    image: flask_dev:v1
+    pull_policy: never   # Supaya tidak mencoba pull ke Docker Hub (jika memang ada bisa hapus baris ini)
 
     # Custom container name
     container_name: sample_vps_flask_dev
 
+    # Expose internal port antar container
     expose:
       - "5000"
 
-    volumes:
-      # Bind Mount
-      - .:/app
+    # # Untuk testing di browser
+    # ports:
+    #   - "5000:5000"
 
-    environment:
-      - FLASK_ENV=development
-      - PYTHONDONTWRITEBYTECODE=1
-      - PYTHONUNBUFFERED=1
+    volumes:
+      # Bind Mount (selalu arahkan ke root project, jika sudah di root cukup (.))
+      - ..:/app
 
     restart: unless-stopped
 
@@ -44,7 +45,7 @@ services:
 
     volumes:
       # Bind Mount
-      - ./composser/caddy/Caddyfile.dev:/etc/caddy/Caddyfile
+      - ./images/caddy/Caddyfile.dev:/etc/caddy/Caddyfile
 
       # Named Volume
       - caddy_data:/data

@@ -4,23 +4,20 @@ FROM python:3.12-slim-bookworm
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 
+# mengarah ke directory di dalam container
 WORKDIR /app
 
-# Install system dependencies (jika dibutuhkan library seperti psycopg2, pillow, dll)
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install python dependencies
+# Install python dependencies (harus satu dir dengan Dockerfile)
 COPY requirements.txt .
+
+# Running dependency
 RUN pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt
 
-# Copy project
+# Copy project (di dev biasanya akan dioverride volume)
 COPY . .
 
-# Expose internal port
+# Expose port dev
 EXPOSE 5000
 
 # Gunicorn production config
