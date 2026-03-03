@@ -3,29 +3,53 @@
 # Production environment
 # =========================================
 
+# Global Config
 {
     email prasetya.career@gmail.com
 
     log {
-        output file /data/caddy-global.log
+        output file /var/log/caddy/caddy_global.log
         level INFO
+    }
+
+    # optional global servers timeout hardening
+    servers {
+        timeouts {
+            read_body 30s
+            read_header 10s
+            write 30s
+            idle 2m
+        }
     }
 }
 
-# -------------------------------------------------
-# HTTP → HTTPS redirect
-# -------------------------------------------------
+# Redirect HTTP → HTTPS
 :80 {
     redir https://{host}{uri}
 }
 
-# -------------------------------------------------
-# MAIN SITE (domain production)
-# -------------------------------------------------
+# MAIN SITE
 yourdomain.com {
 
     # compression
-    encode gzip
+    encode gzip zstd
+
+    # limit request body size (anti abuse upload)
+    request_body {
+        max_size 10MB
+    }
+
+    # simple rate limiting (basic protection)
+    @rate_limit {
+        not path /health
+    }
+    rate_limit @rate_limit {
+        zone main_zone {
+            key {remote_host}
+            events 100
+            window 1m
+        }
+    }
 
     # cache static asset
     @static {
@@ -35,11 +59,18 @@ yourdomain.com {
 
     # security headers
     header {
-        Strict-Transport-Security "max-age=31536000;"
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
         X-Content-Type-Options "nosniff"
         X-Frame-Options "DENY"
         Referrer-Policy "strict-origin-when-cross-origin"
+        Content-Security-Policy "default-src 'self';"
+        Permissions-Policy "geolocation=(), microphone=(), camera=()"
         -Server
+    }
+
+    # enforce modern TLS only
+    tls {
+        protocols tls1.2 tls1.3
     }
 
     # reverse proxy ke flask production
@@ -48,6 +79,7 @@ yourdomain.com {
         # health check ringan
         health_uri /health
         health_interval 30s
+        health_timeout 5s
 
         # timeout
         transport http {
@@ -59,7 +91,7 @@ yourdomain.com {
 
     # access log
     log {
-        output file /data/access.log {
+        output file /var/log/caddy/caddy_prod_access.log {
             roll_size 50MB
             roll_keep 5
         }

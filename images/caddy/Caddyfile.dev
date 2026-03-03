@@ -14,4 +14,5 @@
         output file /var/log/caddy/caddy_dev_access.log
         level DEBUG
     }
+    format json
 }
