@@ -13,11 +13,11 @@ services:
     # Custom container name
     container_name: sample_vps_flask_dev
 
-    # Expose internal port antar container
+    # Expose internal port antar container (biasa digunakan untuk reverse & forward proxy)
     expose:
       - "5000"
 
-    # # Untuk testing di browser
+    # # Untuk testing di browser (tidak menggunakan reverse & forward proxy)
     # ports:
     #   - "5000:5000"
 

@@ -3,16 +3,49 @@
 # Development environment
 # =========================================
 
-# untuk http
+# global
+{
+    # global debug mode
+    debug
+
+    log {
+        level DEBUG
+    }
+}
+
+# untuk http (localhost)
 :80 {
 
-    # forward semua request ke flask dev container
-    reverse_proxy flask_app:5000
+    # encode untuk test compression
+    encode gzip zstd
 
-    # menambahkan log agar bisa di trace
+    # forward semua request ke flask dev container
+    reverse_proxy flask_app:5000 {
+
+        # tampilkan header upstream untuk debug
+        header_up X-Forwarded-Proto {scheme}
+        header_up X-Forwarded-For {remote_host}
+        header_up X-Real-IP {remote_host}
+
+        # health check walau dev
+        health_uri /health
+        health_interval 10s
+
+        transport http {
+            read_timeout 60s
+            write_timeout 60s
+        }
+    }
+
+    # log detail request
     log {
         output file /var/log/caddy/caddy_dev_access.log
         level DEBUG
+        format json
     }
-    format json
+
+    # tampilkan error detail
+    handle_errors {
+        respond "{http.error.status_code} {http.error.status_text}"
+    }
 }
